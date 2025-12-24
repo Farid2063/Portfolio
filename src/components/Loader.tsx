@@ -72,7 +72,7 @@ export default function Loader() {
         <button
         id="enter-btn"
         onClick={onEnter}
-        className="px-10 py-3 border border-white text-white hover:bg-black hover:text-white transition-all duration-700 uppercase text-[10px] tracking-[0.4em]"
+        className="px-10 py-3 border border-white text-white bg-transparent hover:bg-white hover:text-black transition-all duration-700 uppercase text-[10px] tracking-[0.4em] cursor-pointer"
         >
             Enter
         </button>

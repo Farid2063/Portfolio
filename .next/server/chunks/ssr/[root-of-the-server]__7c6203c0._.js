@@ -1,0 +1,3 @@
+module.exports=[60630,a=>{a.v({className:"inter_db9c257a-module__P6rd1W__className"})},27572,a=>{"use strict";var b=a.i(7997),c=a.i(60630);let d={className:c.default.className,style:{fontFamily:"'Inter', 'Inter Fallback'",fontStyle:"normal"}};function e({children:a}){return(0,b.jsx)("html",{lang:"en",children:(0,b.jsx)("body",{className:`${d.className} bg-[#0a0a0a] text-white antialiased`,children:a})})}null!=c.default.variable&&(d.variable=c.default.variable),a.s(["default",()=>e,"metadata",0,{title:"Fariduddin Fakhrizan | Portfolio",description:"Full-Stack Developer, Cloud Engineer, and UI/UX Designer"}],27572)}];
+
+//# sourceMappingURL=%5Broot-of-the-server%5D__7c6203c0._.js.map

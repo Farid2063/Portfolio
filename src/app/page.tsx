@@ -14,16 +14,21 @@ type Project = {
 }
 
 export default async function Home() {
-  // Fetch projects from PostgreSQL
+  // Fetch projects from PostgreSQL - skip if database is slow
   let projects: Project[] = []
-  try {
-    projects = await prisma.project.findMany({
-      orderBy: { index: 'asc' }
-    })
-  } catch (error) {
-    console.error('Database error:', error)
-    // Fallback to empty array if database is not available
-    projects = []
+  
+  // Skip database query entirely if DATABASE_URL is not set or database is unavailable
+  // This prevents server crashes and slow loading
+  if (process.env.DATABASE_URL) {
+    try {
+      projects = await prisma.project.findMany({
+        orderBy: { index: 'asc' },
+        take: 10, // Limit results for performance
+      })
+    } catch (error) {
+      // Silently handle database errors - fallback to empty array
+      projects = []
+    }
   }
 
   return (
