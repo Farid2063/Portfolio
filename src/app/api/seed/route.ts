@@ -69,23 +69,41 @@ export async function POST(request: Request) {
       },
     ];
 
-    // Try to create projects, handle type column if it doesn't exist
-    let createdProjects;
-    try {
-      createdProjects = await Promise.all(
-        projectsData.map((data) => prisma!.project.create({ data }))
-      );
-    } catch (createError: any) {
-      // If type column doesn't exist, create without it
-      if (createError?.message?.includes('type') || createError?.code === 'P2022') {
-        const projectsWithoutType = projectsData.map(({ type, ...rest }) => rest);
-        createdProjects = await Promise.all(
-          projectsWithoutType.map((data) => prisma!.project.create({ data }))
-        );
-      } else {
-        throw createError;
-      }
-    }
+    // Insert projects using raw SQL to avoid Prisma schema issues
+    const insertSQL = `
+      INSERT INTO "Project" (title, description, image, link, index, type, "createdAt", "updatedAt")
+      VALUES 
+        ($1, $2, $3, $4, $5, $6, NOW(), NOW()),
+        ($7, $8, $9, $10, $11, $12, NOW(), NOW()),
+        ($13, $14, $15, $16, $17, $18, NOW(), NOW())
+    `;
+    
+    await prisma.$executeRawUnsafe(
+      insertSQL,
+      projectsData[0].title,
+      projectsData[0].description,
+      projectsData[0].image,
+      projectsData[0].link,
+      projectsData[0].index,
+      projectsData[0].type,
+      projectsData[1].title,
+      projectsData[1].description,
+      projectsData[1].image,
+      projectsData[1].link,
+      projectsData[1].index,
+      projectsData[1].type,
+      projectsData[2].title,
+      projectsData[2].description,
+      projectsData[2].image,
+      projectsData[2].link,
+      projectsData[2].index,
+      projectsData[2].type
+    );
+
+    // Fetch created projects to return
+    const createdProjects = await prisma.$queryRawUnsafe<Array<{id: number, title: string}>>(
+      'SELECT id, title FROM "Project" ORDER BY index ASC'
+    );
 
     return NextResponse.json(
       {
