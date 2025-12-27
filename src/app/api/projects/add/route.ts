@@ -6,9 +6,9 @@ function isAuthorized(request: Request): boolean {
   const authHeader = request.headers.get("authorization");
   const apiKey = process.env.API_KEY || process.env.NEXT_PUBLIC_API_KEY;
   
-  // If no API key is set, only allow in development
+  // If no API key is set, allow in development OR if DATABASE_URL is not set (for initial setup)
   if (!apiKey) {
-    return process.env.NODE_ENV === "development";
+    return process.env.NODE_ENV === "development" || !process.env.DATABASE_URL;
   }
   
   // Check for Bearer token or API key header
@@ -80,8 +80,15 @@ export async function POST(request: Request) {
       );
     }
 
+    if (!prisma) {
+      return NextResponse.json(
+        { error: "Database client not initialized" },
+        { status: 503 }
+      );
+    }
+
     // Delete all existing projects
-    await prisma.project.deleteMany({});
+    await prisma!.project.deleteMany({});
 
     // Project data with validation
     const projectsData = [
@@ -124,7 +131,7 @@ export async function POST(request: Request) {
 
     // Create projects
     const createdProjects = await Promise.all(
-      projectsData.map((data) => prisma.project.create({ data }))
+      projectsData.map((data) => prisma!.project.create({ data }))
     );
 
     return NextResponse.json(
