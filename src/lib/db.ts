@@ -10,11 +10,28 @@ const prismaClientOptions = {
     ? ["error", "warn"] 
     : ["error"],
   errorFormat: "pretty" as const,
+  // Production optimizations
+  datasources: process.env.DATABASE_URL ? {
+    db: {
+      url: process.env.DATABASE_URL,
+    },
+  } : undefined,
 };
 
 // Use singleton pattern in all environments to prevent multiple instances
 if (!globalForPrisma.prisma) {
-  globalForPrisma.prisma = new PrismaClient(prismaClientOptions);
+  try {
+    globalForPrisma.prisma = new PrismaClient(prismaClientOptions);
+  } catch (error) {
+    console.error('Failed to initialize Prisma Client:', error);
+    // In production, we want to continue even if Prisma fails to initialize
+    // This prevents build-time crashes
+    if (process.env.NODE_ENV === 'production') {
+      console.warn('Prisma Client initialization failed, but continuing in production mode');
+    } else {
+      throw error;
+    }
+  }
 }
 
 const prisma = globalForPrisma.prisma;

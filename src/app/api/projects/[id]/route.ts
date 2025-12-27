@@ -6,6 +6,14 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Check if DATABASE_URL is configured
+    if (!process.env.DATABASE_URL) {
+      return NextResponse.json(
+        { error: "Database not configured" },
+        { status: 503 }
+      );
+    }
+
     const id = parseInt(params.id)
     
     if (isNaN(id)) {

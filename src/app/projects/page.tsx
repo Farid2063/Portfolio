@@ -21,6 +21,12 @@ type Project = {
 
 async function getProjects(): Promise<Project[]> {
   try {
+    // Check if DATABASE_URL is configured (required for production)
+    if (!process.env.DATABASE_URL) {
+      console.warn('DATABASE_URL environment variable is not set')
+      return []
+    }
+
     // First, try to check if the type column exists
     const columnCheck = await prisma.$queryRaw<Array<{ column_name: string }>>`
       SELECT column_name 
@@ -74,7 +80,16 @@ async function getProjects(): Promise<Project[]> {
       }))
     }
   } catch (error: any) {
-    console.error('Error fetching projects:', error?.message || error)
+    // Gracefully handle database errors in production
+    const errorMessage = error?.message || 'Unknown database error'
+    console.error('Error fetching projects:', errorMessage)
+    
+    // Don't throw errors during build time - return empty array
+    // This prevents static page generation from failing
+    if (process.env.NODE_ENV === 'production') {
+      console.warn('Database connection failed in production, returning empty projects array')
+    }
+    
     return []
   }
 }

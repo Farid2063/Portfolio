@@ -72,6 +72,14 @@ export async function POST(request: Request) {
   }
 
   try {
+    // Check if DATABASE_URL is configured
+    if (!process.env.DATABASE_URL) {
+      return NextResponse.json(
+        { error: "Database not configured" },
+        { status: 503 }
+      );
+    }
+
     // Delete all existing projects
     await prisma.project.deleteMany({});
 
