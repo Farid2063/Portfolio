@@ -13,7 +13,7 @@ export async function POST(request: Request) {
 
     // Create table if it doesn't exist
     try {
-      await prisma.$executeRaw`
+      await prisma.$executeRawUnsafe(`
         CREATE TABLE IF NOT EXISTS "Project" (
           id SERIAL PRIMARY KEY,
           title TEXT NOT NULL,
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
           "createdAt" TIMESTAMP DEFAULT NOW(),
           "updatedAt" TIMESTAMP DEFAULT NOW()
         )
-      `;
+      `);
     } catch (schemaError: any) {
       // Table might already exist, that's okay
       if (!schemaError?.message?.includes('already exists')) {
@@ -102,7 +102,8 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { 
         error: "Failed to seed projects",
-        ...(process.env.NODE_ENV === "development" && { details: errorMessage })
+        details: errorMessage, // Show error details in production for debugging
+        stack: process.env.NODE_ENV === "development" ? (error instanceof Error ? error.stack : undefined) : undefined
       },
       { status: 500 }
     );
