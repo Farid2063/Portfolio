@@ -33,24 +33,37 @@ export default function Loader() {
         })
 
         tl.to("#enter-btn", { opacity: 0, duration: 0.5})
-    .to (container.current, {
-        yPercent: -100,
-        duration: 1.5,
-        ease: "expo.inOut"
-    })
-    .from("h1", {
-        y:150,
-        skewY: 7,
-        opacity: 0,
-        duration: 1.2,
-        ease: "power4.out"
-    }, "-=1.1")
-    .from("section:first-of-type span, section:first-of-type p", {
-        y:20,
-        opacity: 0,
-        stagger: 0.1,
-        duration: 0.8
-    }, "-=0.6")
+        .to(container.current, {
+            yPercent: -100,
+            duration: 1.5,
+            ease: "expo.inOut"
+        })
+        .from("h1", {
+            y: 150,
+            skewY: 7,
+            opacity: 0,
+            duration: 1.2,
+            ease: "power4.out"
+        }, "-=1.1")
+        .from("section:first-of-type span", {
+            y: 30,
+            opacity: 0,
+            duration: 0.8,
+            ease: "power3.out"
+        }, "-=0.8")
+        .from("section:first-of-type p", {
+            y: 30,
+            opacity: 0,
+            duration: 0.8,
+            ease: "power3.out"
+        }, "-=0.6")
+        // Hide all other sections initially - they will appear on scroll
+        .set("section:not(:first-of-type)", {
+            y: 100,
+            opacity: 0,
+            visibility: "hidden",
+            pointerEvents: "none"
+        }, "-=0.4")
     }
 
     if (isEntered) return null

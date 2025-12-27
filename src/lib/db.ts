@@ -4,25 +4,36 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-let prisma: PrismaClient;
+// Prisma Client configuration
+const prismaClientOptions = {
+  log: process.env.NODE_ENV === "development" 
+    ? ["error", "warn"] 
+    : ["error"],
+  errorFormat: "pretty" as const,
+};
 
-if (process.env.NODE_ENV === "production") {
-  prisma = new PrismaClient({
-    log: ["error"],
+// Use singleton pattern in all environments to prevent multiple instances
+if (!globalForPrisma.prisma) {
+  globalForPrisma.prisma = new PrismaClient(prismaClientOptions);
+}
+
+const prisma = globalForPrisma.prisma;
+
+// Graceful shutdown
+if (typeof window === "undefined") {
+  process.on("beforeExit", async () => {
+    await prisma.$disconnect();
   });
-} else {
-  if (!globalForPrisma.prisma) {
-    globalForPrisma.prisma = new PrismaClient({
-      log: ["error"],
-      // Add connection timeout to prevent hanging
-      datasources: {
-        db: {
-          url: process.env.DATABASE_URL,
-        },
-      },
-    });
-  }
-  prisma = globalForPrisma.prisma;
+  
+  process.on("SIGINT", async () => {
+    await prisma.$disconnect();
+    process.exit(0);
+  });
+  
+  process.on("SIGTERM", async () => {
+    await prisma.$disconnect();
+    process.exit(0);
+  });
 }
 
 export { prisma };
