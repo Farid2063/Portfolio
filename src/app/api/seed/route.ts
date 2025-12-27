@@ -11,8 +11,35 @@ export async function POST(request: Request) {
       );
     }
 
+    // Create table if it doesn't exist
+    try {
+      await prisma.$executeRaw`
+        CREATE TABLE IF NOT EXISTS "Project" (
+          id SERIAL PRIMARY KEY,
+          title TEXT NOT NULL,
+          description TEXT,
+          image TEXT,
+          link TEXT,
+          index INTEGER DEFAULT 0,
+          type TEXT DEFAULT 'DEVELOPMENT',
+          "createdAt" TIMESTAMP DEFAULT NOW(),
+          "updatedAt" TIMESTAMP DEFAULT NOW()
+        )
+      `;
+    } catch (schemaError: any) {
+      // Table might already exist, that's okay
+      if (!schemaError?.message?.includes('already exists')) {
+        console.warn('Schema creation warning:', schemaError.message);
+      }
+    }
+
     // Delete existing projects
-    await prisma!.project.deleteMany({});
+    try {
+      await prisma!.project.deleteMany({});
+    } catch (deleteError: any) {
+      // If delete fails, table might be empty or not exist - continue
+      console.warn('Delete warning:', deleteError?.message);
+    }
 
     // Add projects
     const projectsData = [
@@ -42,9 +69,23 @@ export async function POST(request: Request) {
       },
     ];
 
-    const createdProjects = await Promise.all(
-      projectsData.map((data) => prisma!.project.create({ data }))
-    );
+    // Try to create projects, handle type column if it doesn't exist
+    let createdProjects;
+    try {
+      createdProjects = await Promise.all(
+        projectsData.map((data) => prisma!.project.create({ data }))
+      );
+    } catch (createError: any) {
+      // If type column doesn't exist, create without it
+      if (createError?.message?.includes('type') || createError?.code === 'P2022') {
+        const projectsWithoutType = projectsData.map(({ type, ...rest }) => rest);
+        createdProjects = await Promise.all(
+          projectsWithoutType.map((data) => prisma!.project.create({ data }))
+        );
+      } else {
+        throw createError;
+      }
+    }
 
     return NextResponse.json(
       {
