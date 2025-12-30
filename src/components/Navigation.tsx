@@ -145,6 +145,17 @@ export default function Navigation() {
               </Link>
             )
           })}
+          <a
+            href="/MUHAMMAD FARIDUDDIN BIN FAKHRIZAN_SOFTWARE DEVELOPER.pdf"
+            download
+            onClick={() => setIsOpen(false)}
+            className="text-3xl font-mono uppercase tracking-widest relative text-white group opacity-80 hover:opacity-100 transition-all duration-300 resume-button"
+          >
+            <span className="relative z-10 inline-block group-hover:scale-110 transition-all duration-300">
+              Resume
+            </span>
+            <span className="absolute -bottom-2 left-0 right-0 h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center" />
+          </a>
         </div>
       </div>
 
