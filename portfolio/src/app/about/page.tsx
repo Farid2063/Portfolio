@@ -71,7 +71,7 @@ export default function AboutPage() {
                       Lead Developer
                     </h3>
                     <p className="text-sm font-mono uppercase tracking-widest opacity-60">
-                      REACH Journal Hub · Olympia Education Malaysia
+                      REACH Journal Hub · Executive Information Technology Intern · Olympia Education Malaysia
                     </p>
                   </div>
                 </div>
@@ -92,7 +92,7 @@ export default function AboutPage() {
                       UI/UX Engineer
                     </h3>
                     <p className="text-sm font-mono uppercase tracking-widest opacity-60">
-                      IIIHWS · Olympia Education Malaysia
+                      IIIHWS · Executive Information Technology Intern · Olympia Education Malaysia
                     </p>
                   </div>
                 </div>
@@ -139,8 +139,8 @@ export default function AboutPage() {
               cards={[
                 {
                   title: "Information Systems Engineering",
-                  subtitle: "Bachelor's Degree",
-                  description: "Graduate with expertise in software development, system architecture, and information technology."
+                  subtitle: "Bachelor's Degree (Honours) · Universiti Teknologi MARA",
+                  description: "Graduate with expertise in software development, software testing, system architecture, and information technology."
                 },
                 {
                   title: "AWS Certified Cloud Practitioner",
