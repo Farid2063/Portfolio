@@ -152,17 +152,7 @@ export default function AnimatedSections({ children }: AnimatedSectionsProps) {
         })
       }
 
-      // Animate navigation links
-      const navLinks = document.querySelectorAll('nav a, a[href]')
-      navLinks.forEach((link, index) => {
-        gsap.from(link, {
-          opacity: 0,
-          y: -20,
-          duration: 0.8,
-          delay: 0.5 + index * 0.1,
-          ease: 'power2.out'
-        })
-      })
+      // Navigation is static - no animations applied
 
       // Add continuous subtle animations to headings
       const headings = document.querySelectorAll('h1, h2, h3')

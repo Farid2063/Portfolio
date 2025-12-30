@@ -12,7 +12,7 @@ export default function OfferingsPage() {
       <AnimatedSections>
         <section className="min-h-screen flex flex-col justify-center p-8 md:p-16 border-b border-white/10 relative z-10 pt-32">
           <div className="flex justify-between items-baseline mb-20 relative z-10">
-            <span className="text-[10px] font-mono opacity-40 tracking-widest">002 - OFFERINGS</span>
+            <span className="text-[10px] font-mono opacity-50 tracking-widest">002 - SERVICES</span>
             <DragFollowText as="h2" className="text-4xl font-black uppercase italic text-white gradient-text" intensity={0.2}>
               Core Services
             </DragFollowText>
@@ -71,7 +71,7 @@ export default function OfferingsPage() {
               © 2024 Fariduddin Fakhrizan. All Rights Reserved.
             </p>
             <div className="flex gap-6 text-[10px] font-mono uppercase tracking-widest opacity-30">
-              <span>Built with Next.js 15</span>
+              <span>Built with Next.js 16</span>
               <span>•</span>
               <span>Prisma</span>
               <span>•</span>

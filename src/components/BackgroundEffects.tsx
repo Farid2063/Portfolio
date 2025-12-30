@@ -39,14 +39,17 @@ export default function BackgroundEffects() {
     }
 
     function animate() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      if (!ctx || !canvas) return
+      const canvasWidth = canvas.width
+      const canvasHeight = canvas.height
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight)
 
       particles.forEach((particle, i) => {
         particle.x += particle.vx
         particle.y += particle.vy
 
-        if (particle.x < 0 || particle.x > canvas.width) particle.vx *= -1
-        if (particle.y < 0 || particle.y > canvas.height) particle.vy *= -1
+        if (particle.x < 0 || particle.x > canvasWidth) particle.vx *= -1
+        if (particle.y < 0 || particle.y > canvasHeight) particle.vy *= -1
 
         ctx.beginPath()
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2)
