@@ -1,94 +1,46 @@
-import { prisma } from "@/lib/db"
 import { NextResponse } from "next/server"
+
+// CountAPI configuration - no database needed!
+const COUNTAPI_NAMESPACE = "fariduddin-portfolio"
+const COUNTAPI_KEY = "visitor-count"
 
 // Get visitor count
 export async function GET() {
   try {
-    // Check database URL
-    if (!process.env.DATABASE_URL) {
-      console.error("DATABASE_URL is not set")
-      return NextResponse.json(
-        { 
-          count: 0,
-          error: "Database not configured",
-          fallback: true
+    const response = await fetch(
+      `https://api.countapi.xyz/get/${COUNTAPI_NAMESPACE}/${COUNTAPI_KEY}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
         },
-        { status: 200 } // Return 200 with fallback count
-      )
-    }
-
-    // Check Prisma client
-    if (!prisma) {
-      console.error("Prisma client is not initialized")
-      return NextResponse.json(
-        { 
-          count: 0,
-          error: "Database client not initialized",
-          fallback: true
-        },
-        { status: 200 } // Return 200 with fallback count
-      )
-    }
-
-    // Try to connect and get count
-    try {
-      // Test database connection first
-      await prisma.$connect()
-      const count = await prisma.visitor.count()
-      console.log(`[GET /api/visitors] Successfully retrieved count: ${count}`)
-      return NextResponse.json({ count, success: true })
-    } catch (dbError: unknown) {
-      console.error("[GET /api/visitors] Database query error:", dbError)
-      const errorMessage = dbError instanceof Error ? dbError.message : "Unknown database error"
-      const errorStack = dbError instanceof Error ? dbError.stack : undefined
-      
-      // Log full error details for debugging
-      console.error("[GET /api/visitors] Error details:", {
-        message: errorMessage,
-        stack: errorStack,
-        name: dbError instanceof Error ? dbError.name : "Unknown"
-      })
-      
-      // Check if it's a table doesn't exist error
-      if (errorMessage.includes("does not exist") || 
-          errorMessage.includes("Unknown table") ||
-          errorMessage.includes("relation") && errorMessage.includes("does not exist")) {
-        console.error("[GET /api/visitors] Visitor table does not exist. Run migrations first.")
-        return NextResponse.json(
-          { 
-            count: 0,
-            error: "Database table not found",
-            fallback: true,
-            message: "Please run database migrations",
-            details: errorMessage
-          },
-          { status: 200 }
-        )
+        // Cache for 30 seconds to reduce API calls
+        next: { revalidate: 30 }
       }
-      
-      // Return error details in production too for debugging
-      return NextResponse.json(
-        { 
-          count: 0,
-          error: "Database connection failed",
-          fallback: true,
-          details: errorMessage,
-          debug: process.env.NODE_ENV === "production" ? "Check Vercel logs" : errorStack
-        },
-        { status: 200 } // Return 200 with fallback
-      )
+    )
+    
+    if (!response.ok) {
+      throw new Error(`CountAPI returned ${response.status}`)
     }
-  } catch (error: unknown) {
-    console.error("Unexpected error in GET /api/visitors:", error)
+    
+    const data = await response.json()
+    const count = data.value || 0
+    
+    console.log(`[GET /api/visitors] Retrieved count: ${count}`)
+    return NextResponse.json({ 
+      count, 
+      success: true 
+    })
+  } catch (error) {
+    console.error("[GET /api/visitors] Error fetching visitor count:", error)
     const errorMessage = error instanceof Error ? error.message : "Unknown error"
     
-    // Always return a response, never crash
     return NextResponse.json(
       { 
-        count: 0,
-        error: "Failed to fetch visitor count",
+        count: 0, 
+        error: "Failed to fetch count", 
         fallback: true,
-        ...(process.env.NODE_ENV === "development" && { details: errorMessage })
+        details: process.env.NODE_ENV === "development" ? errorMessage : undefined
       },
       { status: 200 } // Return 200 with fallback count
     )
@@ -98,139 +50,73 @@ export async function GET() {
 // Track a new visitor
 export async function POST(request: Request) {
   try {
-    // Check database URL
-    if (!process.env.DATABASE_URL) {
-      console.error("DATABASE_URL is not set")
-      // Return current count (0) instead of error
-      return NextResponse.json(
-        { 
-          count: 0,
-          success: false,
-          error: "Database not configured",
-          fallback: true
-        },
-        { status: 200 }
-      )
-    }
-
-    // Check Prisma client
-    if (!prisma) {
-      console.error("Prisma client is not initialized")
-      return NextResponse.json(
-        { 
-          count: 0,
-          success: false,
-          error: "Database client not initialized",
-          fallback: true
-        },
-        { status: 200 }
-      )
-    }
-
-    // Get IP address and user agent from request
+    // Get IP address for logging (not stored, just for tracking)
     const forwarded = request.headers.get("x-forwarded-for")
     const ipAddress = forwarded ? forwarded.split(",")[0].trim() : 
                      request.headers.get("x-real-ip") || 
                      request.headers.get("cf-connecting-ip") ||
                      "unknown"
-    const userAgent = request.headers.get("user-agent") || "unknown"
-
-    try {
-      // Test database connection first
-      await prisma.$connect()
-      console.log(`[POST /api/visitors] Tracking visitor - IP: ${ipAddress.substring(0, 20)}...`)
-      
-      // Create a new visitor record (allow duplicates for accurate counting)
-      const visitor = await prisma.visitor.create({
-        data: {
-          ipAddress,
-          userAgent,
+    
+    console.log(`[POST /api/visitors] Tracking visitor - IP: ${ipAddress.substring(0, 20)}...`)
+    
+    // Increment the count using CountAPI
+    const response = await fetch(
+      `https://api.countapi.xyz/hit/${COUNTAPI_NAMESPACE}/${COUNTAPI_KEY}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
         },
-      })
-      
-      console.log(`[POST /api/visitors] Visitor created with ID: ${visitor.id}`)
-
-      // Get updated count
-      const count = await prisma.visitor.count()
-      console.log(`[POST /api/visitors] Total visitor count: ${count}`)
-
-      return NextResponse.json({ count, success: true })
-    } catch (dbError: unknown) {
-      console.error("[POST /api/visitors] Database error tracking visitor:", dbError)
-      const errorMessage = dbError instanceof Error ? dbError.message : "Unknown database error"
-      const errorStack = dbError instanceof Error ? dbError.stack : undefined
-      
-      // Log full error details
-      console.error("[POST /api/visitors] Error details:", {
-        message: errorMessage,
-        stack: errorStack,
-        name: dbError instanceof Error ? dbError.name : "Unknown",
-        ipAddress: ipAddress.substring(0, 20)
-      })
-      
-      // Check if it's a table doesn't exist error
-      if (errorMessage.includes("does not exist") || 
-          errorMessage.includes("Unknown table") ||
-          (errorMessage.includes("relation") && errorMessage.includes("does not exist"))) {
-        console.error("[POST /api/visitors] Visitor table does not exist. Run migrations first.")
-        // Try to get count anyway (might work if table exists but create failed)
-        try {
-          const count = await prisma.visitor.count()
-          return NextResponse.json({ 
-            count, 
-            success: false,
-            error: "Table not found",
-            fallback: true,
-            details: errorMessage
-          })
-        } catch {
-          return NextResponse.json({ 
-            count: 0, 
-            success: false,
-            error: "Table not found",
-            fallback: true,
-            details: errorMessage
-          })
-        }
+        cache: "no-store" // Don't cache increment requests
       }
-      
-      // Try to get current count as fallback
-      try {
-        const count = await prisma.visitor.count()
-        console.log(`[POST /api/visitors] Fallback: Retrieved count ${count} despite tracking error`)
-        return NextResponse.json({ 
-          count, 
-          success: false,
-          error: "Failed to track, but count retrieved",
-          fallback: true,
-          details: errorMessage
-        })
-      } catch {
-        return NextResponse.json({ 
-          count: 0, 
-          success: false,
-          error: "Database connection failed",
-          fallback: true,
-          details: errorMessage,
-          debug: process.env.NODE_ENV === "production" ? "Check Vercel logs" : errorStack
-        })
-      }
+    )
+    
+    if (!response.ok) {
+      throw new Error(`CountAPI returned ${response.status}`)
     }
-  } catch (error: unknown) {
-    console.error("Unexpected error in POST /api/visitors:", error)
+    
+    const data = await response.json()
+    const count = data.value || 0
+    
+    console.log(`[POST /api/visitors] Visitor tracked. New count: ${count}`)
+    return NextResponse.json({ 
+      count, 
+      success: true 
+    })
+  } catch (error) {
+    console.error("[POST /api/visitors] Error tracking visitor:", error)
     const errorMessage = error instanceof Error ? error.message : "Unknown error"
     
-    // Always return a response, never crash
+    // Try to get current count as fallback
+    try {
+      const getResponse = await fetch(
+        `https://api.countapi.xyz/get/${COUNTAPI_NAMESPACE}/${COUNTAPI_KEY}`,
+        { cache: "no-store" }
+      )
+      if (getResponse.ok) {
+        const getData = await getResponse.json()
+        console.log(`[POST /api/visitors] Fallback: Retrieved count ${getData.value} despite tracking error`)
+        return NextResponse.json({ 
+          count: getData.value || 0, 
+          success: false,
+          error: "Failed to increment but got count",
+          fallback: true,
+          details: process.env.NODE_ENV === "development" ? errorMessage : undefined
+        })
+      }
+    } catch (fallbackError) {
+      console.error("[POST /api/visitors] Fallback also failed:", fallbackError)
+    }
+    
     return NextResponse.json(
       { 
-        count: 0,
+        count: 0, 
         success: false,
-        error: "Failed to track visitor",
+        error: "Failed to track visitor", 
         fallback: true,
-        ...(process.env.NODE_ENV === "development" && { details: errorMessage })
+        details: process.env.NODE_ENV === "development" ? errorMessage : undefined
       },
       { status: 200 } // Return 200 with fallback
     )
   }
 }
-
