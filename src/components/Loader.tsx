@@ -51,10 +51,14 @@ export default function Loader() {
         if (isEntered) return
 
         const handleMouseMove = (e: MouseEvent) => {
+            // Check if parallax layers exist before animating
+            const parallaxLayers = container.current?.querySelectorAll(".parallax-layer")
+            if (!parallaxLayers || parallaxLayers.length === 0) return
+
             const xPercent = (e.clientX / window.innerWidth) - 0.5
             const yPercent = (e.clientY / window.innerHeight) - 0.5
 
-            gsap.to(".parallax-layer", {
+            gsap.to(parallaxLayers, {
                 x: (i, target) => xPercent * Number((target as HTMLElement).dataset.speed) || 0,
                 y: (i, target) => yPercent * Number((target as HTMLElement).dataset.speed) || 0,
                 duration: 1,
