@@ -330,6 +330,7 @@ export default function ContactPage() {
                     value={formData.name}
                     onChange={handleChange}
                     required
+                    autoComplete="name"
                     className="w-full px-4 py-3 rounded-lg border border-gray-400/30 bg-white/5 backdrop-blur-md text-white placeholder-white/40 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/50 transition-all duration-300 form-input"
                     placeholder="Your name"
                     aria-required="true"
@@ -352,6 +353,7 @@ export default function ContactPage() {
                     value={formData.email}
                     onChange={handleChange}
                     required
+                    autoComplete="email"
                     className="w-full px-4 py-3 rounded-lg border border-gray-400/30 bg-white/5 backdrop-blur-md text-white placeholder-white/40 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/50 transition-all duration-300 form-input"
                     placeholder="your.email@example.com"
                     aria-required="true"
@@ -374,6 +376,7 @@ export default function ContactPage() {
                     value={formData.subject}
                     onChange={handleChange}
                     required
+                    autoComplete="off"
                     className="w-full px-4 py-3 rounded-lg border border-gray-400/30 bg-white/5 backdrop-blur-md text-white placeholder-white/40 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/50 transition-all duration-300 form-input"
                     placeholder="What's this about?"
                     aria-required="true"
