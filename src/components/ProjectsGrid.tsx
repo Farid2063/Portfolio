@@ -25,13 +25,25 @@ export default function ProjectsGrid({ projects }: ProjectsGridProps) {
   const gridRef = useRef<HTMLDivElement>(null)
   const cardsRef = useRef<HTMLDivElement[]>([])
 
-  // Enhanced staggered fade-in animation
+  // Enhanced staggered fade-in animation - but ensure titles stay visible
   useGSAP(() => {
     if (!gridRef.current || projects.length === 0) return
 
     const cards = Array.from(gridRef.current.querySelectorAll('.project-card')) as HTMLElement[]
     
     if (cards.length === 0) return
+
+    // Ensure all titles are visible before any animation
+    cards.forEach(card => {
+      const title = card.querySelector('h3') as HTMLElement
+      if (title) {
+        gsap.set(title, { opacity: 1, visibility: 'visible' })
+        const titleSpans = title.querySelectorAll('span')
+        if (titleSpans.length > 0) {
+          gsap.set(titleSpans, { opacity: 1, visibility: 'visible', y: 0 })
+        }
+      }
+    })
 
     // Set initial state for all cards
     gsap.set(cards, {
@@ -60,6 +72,19 @@ export default function ProjectsGrid({ projects }: ProjectsGridProps) {
         ease: 'power2.out',
       },
       ease: 'power3.out',
+      onStart: () => {
+        // Force all titles to remain visible during animation
+        cards.forEach(card => {
+          const title = card.querySelector('h3') as HTMLElement
+          if (title) {
+            gsap.set(title, { opacity: 1, visibility: 'visible' })
+            const titleSpans = title.querySelectorAll('span')
+            if (titleSpans.length > 0) {
+              gsap.set(titleSpans, { opacity: 1, visibility: 'visible', y: 0 })
+            }
+          }
+        })
+      }
     })
 
     // Add subtle hover anticipation effect
@@ -98,13 +123,21 @@ export default function ProjectsGrid({ projects }: ProjectsGridProps) {
       className="grid grid-cols-1 md:grid-cols-2 gap-[1px] border border-white/10" 
       id="projects-grid"
     >
-      {projects.map((project, index) => (
-        <ProjectCard 
-          key={project.id} 
-          project={{...project, index}}
-        />
-      ))}
+      {projects.map((project, index) => {
+        // Debug: log image data
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`Project ${project.id} (${project.title}): image = ${project.image || 'NULL'}`);
+        }
+        return (
+          <ProjectCard 
+            key={project.id} 
+            project={{...project, index}}
+          />
+        );
+      })}
     </div>
   )
 }
+
+
 

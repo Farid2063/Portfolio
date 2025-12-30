@@ -14,7 +14,7 @@ type Project = {
   image: string | null
   link: string | null
   index: number
-  type: 'DEVELOPMENT' | 'DESIGN' | null
+  type: 'DEVELOPMENT' | 'DESIGN'
   createdAt: Date
   updatedAt: Date
 }
@@ -22,13 +22,13 @@ type Project = {
 async function getProjects(): Promise<Project[]> {
   try {
     // Check if DATABASE_URL is configured (required for production)
-    if (!process.env.DATABASE_URL) {
-      console.warn('DATABASE_URL environment variable is not set')
+    if (!process.env.DATABASE_URL || !prisma) {
+      console.warn('DATABASE_URL environment variable is not set or Prisma client not initialized')
       return []
     }
 
     // First, try to check if the type column exists
-    const columnCheck = await prisma.$queryRaw<Array<{ column_name: string }>>`
+    const columnCheck = await prisma!.$queryRaw<Array<{ column_name: string }>>`
       SELECT column_name 
       FROM information_schema.columns 
       WHERE table_name = 'Project' AND column_name = 'type'
@@ -38,7 +38,7 @@ async function getProjects(): Promise<Project[]> {
     
     if (hasTypeColumn) {
       // Column exists, use normal Prisma query
-      const projects = await prisma.project.findMany({
+      const projects = await prisma!.project.findMany({
         orderBy: { index: 'asc' },
         select: {
           id: true,
@@ -59,7 +59,7 @@ async function getProjects(): Promise<Project[]> {
       }))
     } else {
       // Column doesn't exist, use raw query
-      const projects = await prisma.$queryRaw<Array<{
+      const projects = await prisma!.$queryRaw<Array<{
         id: number
         title: string
         description: string | null

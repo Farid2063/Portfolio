@@ -104,7 +104,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
     >
       <div 
         ref={cardRef}
-        className="project-card relative group h-[70vh] bg-[#0a0a0a] p-10 flex flex-col justify-between overflow-hidden cursor-pointer border-white/5 border-[0.5px] hover-lift hover-glow glass"
+        className="project-card relative group h-[60vh] md:h-[70vh] bg-[#0a0a0a] p-6 md:p-10 flex flex-col justify-between overflow-hidden cursor-pointer border-white/5 border-[0.5px] hover-lift hover-glow glass"
         style={{
           transformStyle: 'preserve-3d',
         }}
@@ -112,59 +112,85 @@ export default function ProjectCard({ project }: ProjectCardProps) {
       {/* Animated background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
       
-      {/* Image overlay with enhanced effects */}
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-30 transition-all duration-700 ease-in-out">
-        {project.image ? (
+      {/* Image overlay with enhanced effects - now visible by default */}
+      {project.image ? (
+        <div className="absolute inset-0 opacity-30 group-hover:opacity-40 transition-all duration-700 ease-in-out z-0">
           <img 
             src={project.image} 
             alt={project.title} 
-            className="w-full h-full object-cover grayscale scale-110 group-hover:scale-100 group-hover:grayscale-0 transition-all duration-1000"
+            className="w-full h-full object-cover grayscale-[0.7] scale-105 group-hover:scale-100 group-hover:grayscale-[0.3] transition-all duration-1000"
             loading="lazy"
             decoding="async"
             fetchPriority="low"
+            onError={(e) => {
+              console.error('Image failed to load:', project.image);
+              e.currentTarget.style.display = 'none';
+            }}
           />
-        ) : (
-          // Professional placeholder for null images
-          <div className="w-full h-full bg-gray-500/20 backdrop-blur-sm flex items-center justify-center">
-            <div className="text-center opacity-30">
-              <div className="w-16 h-16 border-2 border-white/20 rounded-lg mx-auto mb-2 flex items-center justify-center">
-                <span className="text-2xl">📐</span>
-              </div>
-              <p className="text-xs font-mono uppercase tracking-widest">No Preview</p>
+        </div>
+      ) : (
+        // Professional placeholder for null images
+        <div className="absolute inset-0 bg-gray-500/20 backdrop-blur-sm flex items-center justify-center z-0">
+          <div className="text-center opacity-30">
+            <div className="w-16 h-16 border-2 border-white/20 rounded-lg mx-auto mb-2 flex items-center justify-center">
+              <span className="text-2xl">📐</span>
             </div>
+            <p className="text-xs font-mono uppercase tracking-widest">No Preview</p>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+      
+      {/* Strong dark overlay for text readability on hover */}
+      {project.image && (
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-[1]">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/60 to-black/40" />
+        </div>
+      )}
+      
+      {/* Additional subtle overlay for better text contrast */}
+      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-all duration-700 pointer-events-none z-[1]" />
 
       {/* Shimmer effect */}
       <div className="absolute inset-0 shimmer opacity-0 group-hover:opacity-20 transition-opacity duration-500" />
 
       {/* Content */}
-      <div className="relative z-10 flex justify-between items-start opacity-40 text-[10px] font-mono uppercase tracking-widest group-hover:opacity-100 transition-all duration-500">
-        <span className="group-hover:translate-x-2 transition-transform duration-500">0{project.id}/PROJECT</span>
+      <div className="relative z-10 flex justify-between items-start mb-4 md:mb-0 opacity-40 text-[9px] md:text-[10px] font-mono uppercase tracking-widest group-hover:opacity-100 transition-all duration-500">
+        <span className="group-hover:translate-x-2 transition-transform duration-500 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">0{project.id}/PROJECT</span>
       </div>
 
       <div className="relative z-10 flex-1 flex flex-col justify-between">
         <div>
-          <h3 className="text-5xl font-black uppercase tracking-tighter mb-4 group-hover:-translate-y-2 group-hover:scale-105 transition-all duration-500 gradient-text">
-            {project.title}
-          </h3>
-          <p className="max-h-0 opacity-0 group-hover:max-h-[500px] group-hover:opacity-70 transition-all duration-700 ease-in-out text-sm md:text-base max-w-lg leading-relaxed group-hover:translate-y-0 translate-y-4 overflow-hidden">
-            {project.description}
-          </p>
+          <div className="flex flex-col md:flex-row md:items-center md:gap-4 mb-4">
+            <h3 className="text-3xl md:text-5xl font-black uppercase tracking-tighter group-hover:-translate-y-2 group-hover:scale-105 transition-all duration-500 gradient-text leading-tight drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)] group-hover:drop-shadow-[0_6px_12px_rgba(0,0,0,0.95)]">
+              {project.title}
+            </h3>
+            {/* Design Badge - Mobile: below title, Desktop: absolute positioned */}
+            {projectType === 'DESIGN' && (
+              <div className="md:hidden mt-2 w-fit px-3 py-1 bg-purple-500/30 backdrop-blur-md border border-purple-400/40 rounded-full shadow-lg">
+                <span className="text-[9px] font-mono uppercase tracking-widest text-purple-200 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Design Phase</span>
+              </div>
+            )}
+          </div>
+          <div className="relative">
+            <p className="max-h-0 opacity-0 group-hover:max-h-[500px] group-hover:opacity-100 transition-all duration-700 ease-in-out text-xs md:text-sm lg:text-base max-w-lg leading-relaxed group-hover:translate-y-0 translate-y-4 overflow-hidden text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] group-hover:drop-shadow-[0_4px_8px_rgba(0,0,0,0.95)]">
+              {project.description}
+            </p>
+            {/* Text background for better readability */}
+            <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 -z-10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-sm" />
+          </div>
         </div>
 
         {/* Action Button - Live Website or Interactive Prototype */}
         {project.link && (
           <button
             onClick={handleLiveWebsiteClick}
-            className="mt-6 w-fit px-6 py-3 bg-black/40 backdrop-blur-sm border-2 border-white/20 text-white transition-all duration-500 text-xs font-mono uppercase tracking-widest hover:border-white/60 hover-lift opacity-0 group-hover:opacity-100 group-hover:translate-y-0 translate-y-4"
+            className="mt-4 md:mt-6 w-fit px-4 md:px-6 py-2 md:py-3 bg-black/70 backdrop-blur-md border-2 border-white/30 text-white transition-all duration-500 text-[10px] md:text-xs font-mono uppercase tracking-widest hover:border-white/70 hover-lift opacity-0 group-hover:opacity-100 group-hover:translate-y-0 translate-y-4 shadow-[0_4px_12px_rgba(0,0,0,0.8)] group-hover:shadow-[0_6px_16px_rgba(0,0,0,0.9)]"
             style={{
               transformStyle: 'preserve-3d',
             }}
           >
             <span className="relative z-10 flex items-center gap-2">
-              <span>{projectType === 'DESIGN' ? 'Interactive Prototype' : 'Live Website'}</span>
+              <span className="text-[10px] md:text-xs">{projectType === 'DESIGN' ? 'Interactive Prototype' : 'Live Website'}</span>
               <span className="transform group-hover:translate-x-1 transition-transform duration-300">→</span>
             </span>
             <span className="absolute inset-0 bg-gradient-to-r from-white/10 via-white/5 to-transparent transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500"></span>
@@ -172,10 +198,10 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           </button>
         )}
         
-        {/* Design Badge */}
+        {/* Design Badge - Desktop: absolute positioned */}
         {projectType === 'DESIGN' && (
-          <div className="absolute top-4 right-4 px-3 py-1 bg-purple-500/20 backdrop-blur-sm border border-purple-400/30 rounded-full">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-purple-300">Design Phase</span>
+          <div className="hidden md:block absolute top-4 right-4 px-3 py-1 bg-purple-500/30 backdrop-blur-md border border-purple-400/40 rounded-full shadow-lg z-20">
+            <span className="text-[9px] md:text-[10px] font-mono uppercase tracking-widest text-purple-200 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Design Phase</span>
           </div>
         )}
       </div>

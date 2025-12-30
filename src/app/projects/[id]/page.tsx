@@ -236,6 +236,21 @@ export default function ProjectDetailPage() {
           )}
         </div>
 
+        {/* Project Image Preview */}
+        {project.image && (
+          <div className="mb-12 relative group overflow-hidden rounded-lg border border-white/10">
+            <div className="relative w-full" style={{ aspectRatio: '16/9', minHeight: '400px' }}>
+              <img 
+                src={project.image} 
+                alt={project.title}
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                loading="eager"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            </div>
+          </div>
+        )}
+
         {/* Design Project - Figma Embed */}
         {isDesignProject && figmaEmbedUrl && (
           <>
@@ -312,40 +327,43 @@ export default function ProjectDetailPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* Hero Page */}
                   <div className="gallery-item relative group overflow-hidden rounded-lg border border-white/10 bg-black/20 backdrop-blur-sm hover-lift">
-                    <div className="aspect-[4/3] bg-gradient-to-br from-purple-500/10 via-transparent to-blue-500/10 flex items-center justify-center">
-                      <div className="text-center">
-                        <div className="text-4xl mb-2">🏠</div>
-                        <span className="text-xs font-mono uppercase tracking-widest opacity-60">Hero Layout</span>
+                    <div className="aspect-[4/3] relative">
+                      <img 
+                        src="/Hero.png" 
+                        alt="Hero Landing Experience"
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                        <span className="text-xs font-mono uppercase tracking-widest">Hero Landing Experience</span>
                       </div>
-                    </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                      <span className="text-xs font-mono uppercase tracking-widest">Hero Landing Experience</span>
                     </div>
                   </div>
 
                   {/* Authentication Page */}
                   <div className="gallery-item relative group overflow-hidden rounded-lg border border-white/10 bg-black/20 backdrop-blur-sm hover-lift">
-                    <div className="aspect-[4/3] bg-gradient-to-br from-blue-500/10 via-transparent to-purple-500/10 flex items-center justify-center">
-                      <div className="text-center">
-                        <div className="text-4xl mb-2">🔐</div>
-                        <span className="text-xs font-mono uppercase tracking-widest opacity-60">Auth System</span>
+                    <div className="aspect-[4/3] relative">
+                      <img 
+                        src="/Auth.png" 
+                        alt="Secure Authentication"
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                        <span className="text-xs font-mono uppercase tracking-widest">Secure Authentication</span>
                       </div>
-                    </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                      <span className="text-xs font-mono uppercase tracking-widest">Secure Authentication</span>
                     </div>
                   </div>
 
                   {/* Course Page */}
                   <div className="gallery-item relative group overflow-hidden rounded-lg border border-white/10 bg-black/20 backdrop-blur-sm hover-lift">
-                    <div className="aspect-[4/3] bg-gradient-to-br from-green-500/10 via-transparent to-blue-500/10 flex items-center justify-center">
-                      <div className="text-center">
-                        <div className="text-4xl mb-2">📚</div>
-                        <span className="text-xs font-mono uppercase tracking-widest opacity-60">Course Layout</span>
+                    <div className="aspect-[4/3] relative">
+                      <img 
+                        src="/Courses.png" 
+                        alt="Course Management"
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                        <span className="text-xs font-mono uppercase tracking-widest">Course Management</span>
                       </div>
-                    </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                      <span className="text-xs font-mono uppercase tracking-widest">Course Management</span>
                     </div>
                   </div>
                 </div>
