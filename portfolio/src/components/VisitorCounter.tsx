@@ -23,19 +23,24 @@ export default function VisitorCounter() {
             },
           })
 
-          if (trackResponse.ok) {
-            const trackData = await trackResponse.json()
-            setCount(trackData.count)
-            // Mark as tracked for this session
-            if (typeof window !== "undefined") {
-              localStorage.setItem(sessionKey, "true")
-            }
-          } else {
-            const errorData = await trackResponse.json().catch(() => ({}))
-            console.error("Tracking failed:", errorData)
-            // If tracking fails, just fetch the count
-            await fetchCount()
+        if (trackResponse.ok) {
+          const trackData = await trackResponse.json()
+          // Use count from response, even if tracking failed (fallback mode)
+          setCount(trackData.count || 0)
+          // Mark as tracked for this session only if actually successful
+          if (trackData.success && typeof window !== "undefined") {
+            localStorage.setItem(sessionKey, "true")
           }
+          // If there's an error but we got a count, show it
+          if (trackData.error) {
+            console.warn("Visitor tracking warning:", trackData.error)
+          }
+        } else {
+          const errorData = await trackResponse.json().catch(() => ({}))
+          console.error("Tracking failed:", errorData)
+          // If tracking fails, just fetch the count
+          await fetchCount()
+        }
         } else {
           // Already tracked, just fetch the count
           await fetchCount()
@@ -57,15 +62,24 @@ export default function VisitorCounter() {
         })
         if (fetchResponse.ok) {
           const fetchData = await fetchResponse.json()
-          setCount(fetchData.count)
-          setError(null)
+          // Always set count, even if there's an error (fallback mode)
+          setCount(fetchData.count || 0)
+          // Only show error if count is 0 and there's an actual error
+          if (fetchData.error && fetchData.count === 0) {
+            setError("Database unavailable")
+          } else {
+            setError(null)
+          }
         } else {
+          // Even on error, try to get data
           const errorData = await fetchResponse.json().catch(() => ({}))
           console.error("Fetch failed:", errorData)
+          setCount(errorData.count || 0)
           setError("Unable to load count")
         }
       } catch (fetchError) {
         console.error("Error fetching visitor count:", fetchError)
+        setCount(0)
         setError("Connection error")
       }
     }
