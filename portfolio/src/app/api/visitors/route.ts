@@ -56,10 +56,11 @@ export async function POST(request: Request) {
     const forwarded = request.headers.get("x-forwarded-for")
     const ipAddress = forwarded ? forwarded.split(",")[0].trim() : 
                      request.headers.get("x-real-ip") || 
+                     request.headers.get("cf-connecting-ip") ||
                      "unknown"
     const userAgent = request.headers.get("user-agent") || "unknown"
 
-    // Create a new visitor record
+    // Create a new visitor record (allow duplicates for accurate counting)
     await prisma.visitor.create({
       data: {
         ipAddress,
