@@ -13,6 +13,8 @@ dist/
 # Prisma
 /generated/prisma
 prisma_dev.log
+.vercel
+.env*.local
 
 # IDE
 .vscode/
