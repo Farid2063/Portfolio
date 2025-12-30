@@ -32,33 +32,48 @@ export async function GET() {
 
     // Try to connect and get count
     try {
+      // Test database connection first
+      await prisma.$connect()
       const count = await prisma.visitor.count()
+      console.log(`[GET /api/visitors] Successfully retrieved count: ${count}`)
       return NextResponse.json({ count, success: true })
     } catch (dbError: unknown) {
-      console.error("Database query error:", dbError)
+      console.error("[GET /api/visitors] Database query error:", dbError)
       const errorMessage = dbError instanceof Error ? dbError.message : "Unknown database error"
+      const errorStack = dbError instanceof Error ? dbError.stack : undefined
+      
+      // Log full error details for debugging
+      console.error("[GET /api/visitors] Error details:", {
+        message: errorMessage,
+        stack: errorStack,
+        name: dbError instanceof Error ? dbError.name : "Unknown"
+      })
       
       // Check if it's a table doesn't exist error
-      if (errorMessage.includes("does not exist") || errorMessage.includes("Unknown table")) {
-        console.error("Visitor table does not exist. Run migrations first.")
+      if (errorMessage.includes("does not exist") || 
+          errorMessage.includes("Unknown table") ||
+          errorMessage.includes("relation") && errorMessage.includes("does not exist")) {
+        console.error("[GET /api/visitors] Visitor table does not exist. Run migrations first.")
         return NextResponse.json(
           { 
             count: 0,
             error: "Database table not found",
             fallback: true,
-            message: "Please run database migrations"
+            message: "Please run database migrations",
+            details: errorMessage
           },
           { status: 200 }
         )
       }
       
-      // Return fallback count instead of error
+      // Return error details in production too for debugging
       return NextResponse.json(
         { 
           count: 0,
           error: "Database connection failed",
           fallback: true,
-          ...(process.env.NODE_ENV === "development" && { details: errorMessage })
+          details: errorMessage,
+          debug: process.env.NODE_ENV === "production" ? "Check Vercel logs" : errorStack
         },
         { status: 200 } // Return 200 with fallback
       )
@@ -121,25 +136,43 @@ export async function POST(request: Request) {
     const userAgent = request.headers.get("user-agent") || "unknown"
 
     try {
+      // Test database connection first
+      await prisma.$connect()
+      console.log(`[POST /api/visitors] Tracking visitor - IP: ${ipAddress.substring(0, 20)}...`)
+      
       // Create a new visitor record (allow duplicates for accurate counting)
-      await prisma.visitor.create({
+      const visitor = await prisma.visitor.create({
         data: {
           ipAddress,
           userAgent,
         },
       })
+      
+      console.log(`[POST /api/visitors] Visitor created with ID: ${visitor.id}`)
 
       // Get updated count
       const count = await prisma.visitor.count()
+      console.log(`[POST /api/visitors] Total visitor count: ${count}`)
 
       return NextResponse.json({ count, success: true })
     } catch (dbError: unknown) {
-      console.error("Database error tracking visitor:", dbError)
+      console.error("[POST /api/visitors] Database error tracking visitor:", dbError)
       const errorMessage = dbError instanceof Error ? dbError.message : "Unknown database error"
+      const errorStack = dbError instanceof Error ? dbError.stack : undefined
+      
+      // Log full error details
+      console.error("[POST /api/visitors] Error details:", {
+        message: errorMessage,
+        stack: errorStack,
+        name: dbError instanceof Error ? dbError.name : "Unknown",
+        ipAddress: ipAddress.substring(0, 20)
+      })
       
       // Check if it's a table doesn't exist error
-      if (errorMessage.includes("does not exist") || errorMessage.includes("Unknown table")) {
-        console.error("Visitor table does not exist. Run migrations first.")
+      if (errorMessage.includes("does not exist") || 
+          errorMessage.includes("Unknown table") ||
+          (errorMessage.includes("relation") && errorMessage.includes("does not exist"))) {
+        console.error("[POST /api/visitors] Visitor table does not exist. Run migrations first.")
         // Try to get count anyway (might work if table exists but create failed)
         try {
           const count = await prisma.visitor.count()
@@ -147,14 +180,16 @@ export async function POST(request: Request) {
             count, 
             success: false,
             error: "Table not found",
-            fallback: true
+            fallback: true,
+            details: errorMessage
           })
         } catch {
           return NextResponse.json({ 
             count: 0, 
             success: false,
             error: "Table not found",
-            fallback: true
+            fallback: true,
+            details: errorMessage
           })
         }
       }
@@ -162,11 +197,13 @@ export async function POST(request: Request) {
       // Try to get current count as fallback
       try {
         const count = await prisma.visitor.count()
+        console.log(`[POST /api/visitors] Fallback: Retrieved count ${count} despite tracking error`)
         return NextResponse.json({ 
           count, 
           success: false,
           error: "Failed to track, but count retrieved",
-          fallback: true
+          fallback: true,
+          details: errorMessage
         })
       } catch {
         return NextResponse.json({ 
@@ -174,7 +211,8 @@ export async function POST(request: Request) {
           success: false,
           error: "Database connection failed",
           fallback: true,
-          ...(process.env.NODE_ENV === "development" && { details: errorMessage })
+          details: errorMessage,
+          debug: process.env.NODE_ENV === "production" ? "Check Vercel logs" : errorStack
         })
       }
     }

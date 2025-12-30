@@ -10,39 +10,33 @@ export default function VisitorCounter() {
   useEffect(() => {
     const trackAndFetchVisitor = async () => {
       try {
-        // Check if we've already tracked this session
-        const sessionKey = "visitor_tracked_" + new Date().toDateString()
-        const alreadyTracked = typeof window !== "undefined" && localStorage.getItem(sessionKey)
-
-        if (!alreadyTracked) {
-          // Track the visitor
-          const trackResponse = await fetch("/api/visitors", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          })
+        // Always try to track visitor (removed session check to ensure all visits are counted)
+        const trackResponse = await fetch("/api/visitors", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          cache: "no-store",
+        })
 
         if (trackResponse.ok) {
           const trackData = await trackResponse.json()
-          // Use count from response, even if tracking failed (fallback mode)
+          console.log("Visitor tracking response:", trackData)
+          
+          // Use count from response
           setCount(trackData.count || 0)
-          // Mark as tracked for this session only if actually successful
-          if (trackData.success && typeof window !== "undefined") {
-            localStorage.setItem(sessionKey, "true")
-          }
-          // If there's an error but we got a count, show it
+          
+          // Show error if tracking failed but we got a count
           if (trackData.error) {
-            console.warn("Visitor tracking warning:", trackData.error)
+            console.warn("Visitor tracking warning:", trackData.error, trackData.details)
+            setError(trackData.error)
+          } else {
+            setError(null)
           }
         } else {
           const errorData = await trackResponse.json().catch(() => ({}))
-          console.error("Tracking failed:", errorData)
+          console.error("Tracking failed with status:", trackResponse.status, errorData)
           // If tracking fails, just fetch the count
-          await fetchCount()
-        }
-        } else {
-          // Already tracked, just fetch the count
           await fetchCount()
         }
       } catch (error) {
