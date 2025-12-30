@@ -2,7 +2,6 @@
   "buildCommand": "npm install && npx prisma generate && npm run build",
   "outputDirectory": ".next",
   "installCommand": "npm install",
-  "framework": "nextjs",
-  "rootDirectory": "."
+  "framework": "nextjs"
 }
 
