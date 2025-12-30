@@ -26,12 +26,19 @@ export default function VisitorCounter() {
           // Use count from response
           setCount(trackData.count || 0)
           
-          // Show error if tracking failed but we got a count
-          if (trackData.error) {
-            console.warn("Visitor tracking warning:", trackData.error, trackData.details)
-            setError(trackData.error)
+          // Only show error if tracking failed AND we don't have a valid count
+          // If it's a fallback response but we have a count, don't show error
+          if (trackData.error && !trackData.success && trackData.count === 0) {
+            const errorMsg = trackData.error || "Failed to track visitor"
+            const details = trackData.details ? ` (${trackData.details})` : ""
+            console.warn("Visitor tracking warning:", errorMsg + details)
+            setError(errorMsg)
           } else {
+            // Success or fallback with count - no error to show
             setError(null)
+            if (trackData.fallback && trackData.count > 0) {
+              console.log("Using fallback count:", trackData.count)
+            }
           }
         } else {
           const errorData = await trackResponse.json().catch(() => ({}))
