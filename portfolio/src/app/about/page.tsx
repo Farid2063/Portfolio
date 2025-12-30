@@ -15,7 +15,7 @@ export default function AboutPage() {
         <section className="min-h-screen flex flex-col justify-center p-8 md:p-16 border-b border-white/10 relative z-10 pt-32">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-1000" />
           <div className="flex justify-between items-baseline mb-12 relative z-10">
-            <span className="text-[10px] font-mono opacity-40 tracking-widest">001 - ABOUT</span>
+            <span className="text-[10px] font-mono opacity-50 tracking-widest">001 - ABOUT</span>
             <DragFollowText as="h2" className="text-4xl font-black uppercase italic text-white" intensity={0.2}>
               About Me
             </DragFollowText>
@@ -44,9 +44,9 @@ export default function AboutPage() {
                 </p>
               </div>
               <div className="pt-4 flex flex-wrap gap-4">
-                <span className="px-4 py-2 border border-white/20 text-xs font-mono uppercase tracking-wider opacity-60 hover-lift hover:opacity-100 hover:border-white/40 transition-all duration-300 animated-border">Full-Stack</span>
-                <span className="px-4 py-2 border border-white/20 text-xs font-mono uppercase tracking-wider opacity-60 hover-lift hover:opacity-100 hover:border-white/40 transition-all duration-300 animated-border">Cloud Engineer</span>
-                <span className="px-4 py-2 border border-white/20 text-xs font-mono uppercase tracking-wider opacity-60 hover-lift hover:opacity-100 hover:border-white/40 transition-all duration-300 animated-border">UI/UX Designer</span>
+                <span className="px-4 py-2 border border-white/20 text-xs font-mono uppercase tracking-wider opacity-70 hover-lift hover:opacity-100 hover:border-white/40 transition-all duration-300 animated-border">Full-Stack</span>
+                <span className="px-4 py-2 border border-white/20 text-xs font-mono uppercase tracking-wider opacity-70 hover-lift hover:opacity-100 hover:border-white/40 transition-all duration-300 animated-border">Cloud Engineer</span>
+                <span className="px-4 py-2 border border-white/20 text-xs font-mono uppercase tracking-wider opacity-70 hover-lift hover:opacity-100 hover:border-white/40 transition-all duration-300 animated-border">UI/UX Designer</span>
               </div>
             </div>
           </div>
@@ -55,7 +55,7 @@ export default function AboutPage() {
         {/* Work Experience Section */}
         <section className="min-h-screen flex flex-col justify-center p-8 md:p-16 border-b border-white/10 relative z-10">
           <div className="flex justify-between items-baseline mb-12 relative z-10">
-            <span className="text-[10px] font-mono opacity-40 tracking-widest">002 - EXPERIENCE</span>
+            <span className="text-[10px] font-mono opacity-50 tracking-widest">002 - EXPERIENCE</span>
             <DragFollowText as="h2" className="text-4xl font-black uppercase italic text-white" intensity={0.2}>
               Work Experience
             </DragFollowText>
@@ -129,7 +129,7 @@ export default function AboutPage() {
         {/* Education & Certification Section */}
         <section className="min-h-screen flex flex-col justify-center p-8 md:p-16 border-b border-white/10 relative z-10">
           <div className="flex justify-between items-baseline mb-12 relative z-10">
-            <span className="text-[10px] font-mono opacity-40 tracking-widest">003 - QUALIFICATIONS</span>
+            <span className="text-[10px] font-mono opacity-50 tracking-widest">003 - QUALIFICATIONS</span>
             <DragFollowText as="h2" className="text-4xl font-black uppercase italic text-white" intensity={0.2}>
               Education & Certification
             </DragFollowText>
@@ -158,7 +158,7 @@ export default function AboutPage() {
               © 2024 Fariduddin Fakhrizan. All Rights Reserved.
             </p>
             <div className="flex gap-6 text-[10px] font-mono uppercase tracking-widest opacity-30">
-              <span>Built with Next.js 15</span>
+              <span>Built with Next.js 16</span>
               <span>•</span>
               <span>Prisma</span>
               <span>•</span>

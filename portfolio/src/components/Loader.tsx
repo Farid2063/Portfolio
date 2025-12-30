@@ -2,32 +2,13 @@
 
 import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect, useCallback } from 'react'
 
 export default function Loader() {
     const container = useRef<HTMLDivElement>(null)
     const [isEntered, setIsEntered] = useState(false)
 
-    useGSAP(() => {
-        if (isEntered) return
-
-        const handleMouseMove = (e: MouseEvent) => {
-            const xPercent = (e.clientX / window.innerWidth) - 0.5
-            const yPercent = (e.clientY / window.innerHeight) - 0.5
-
-            gsap.to(".parallax-layer", {
-                x: (i, target) => xPercent * Number((target as HTMLElement).dataset.speed) || 0,
-                y: (i, target) => yPercent * Number((target as HTMLElement).dataset.speed) || 0,
-                duration: 1,
-                ease: "power2.out"
-            })
-        }
-
-        window.addEventListener('mousemove', handleMouseMove)
-        return () => window.removeEventListener('mousemove', handleMouseMove)
-    }, { scope: container, dependencies: [isEntered]})
-
-    const onEnter = () => {
+    const onEnter = useCallback(() => {
         const tl = gsap.timeline({
             onComplete: () => setIsEntered(true)
         })
@@ -64,7 +45,37 @@ export default function Loader() {
             visibility: "hidden",
             pointerEvents: "none"
         }, "-=0.4")
-    }
+    }, [])
+
+    useGSAP(() => {
+        if (isEntered) return
+
+        const handleMouseMove = (e: MouseEvent) => {
+            const xPercent = (e.clientX / window.innerWidth) - 0.5
+            const yPercent = (e.clientY / window.innerHeight) - 0.5
+
+            gsap.to(".parallax-layer", {
+                x: (i, target) => xPercent * Number((target as HTMLElement).dataset.speed) || 0,
+                y: (i, target) => yPercent * Number((target as HTMLElement).dataset.speed) || 0,
+                duration: 1,
+                ease: "power2.out"
+            })
+        }
+
+        window.addEventListener('mousemove', handleMouseMove)
+        return () => window.removeEventListener('mousemove', handleMouseMove)
+    }, { scope: container, dependencies: [isEntered]})
+
+    // Auto-transition after 1.5 seconds
+    useEffect(() => {
+        if (isEntered) return
+        
+        const timer = setTimeout(() => {
+            onEnter()
+        }, 1500)
+
+        return () => clearTimeout(timer)
+    }, [isEntered, onEnter])
 
     if (isEntered) return null
 

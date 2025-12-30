@@ -16,8 +16,8 @@ export const metadata: Metadata = {
     default: "Fariduddin Fakhrizan | Portfolio",
     template: "%s | Fariduddin Fakhrizan",
   },
-  description: "Full-Stack Developer, Cloud Engineer, and UI/UX Designer. Specialized in high-stakes software development, bridging complex backend logic with elite UI/UX design.",
-  keywords: ["Full-Stack Developer", "Cloud Engineer", "UI/UX Designer", "Laravel", "Next.js", "AWS", "Portfolio"],
+  description: "Full-Stack Developer & Cloud Engineer specializing in high-end UI/UX and scalable architecture. Available for projects.",
+  keywords: ["Full-Stack Developer", "Cloud Engineer", "UI/UX Designer", "Laravel", "Next.js", "AWS", "Portfolio", "Software Engineer"],
   authors: [{ name: "Fariduddin Fakhrizan" }],
   creator: "Fariduddin Fakhrizan",
   openGraph: {
@@ -25,13 +25,22 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://fariduddin.dev",
     title: "Fariduddin Fakhrizan | Portfolio",
-    description: "Full-Stack Developer, Cloud Engineer, and UI/UX Designer",
+    description: "Full-Stack Developer & Cloud Engineer specializing in high-end UI/UX and scalable architecture. Available for projects.",
     siteName: "Fariduddin Fakhrizan Portfolio",
+    images: [
+      {
+        url: "/og-image.png", // Placeholder - add your OG image to public folder
+        width: 1200,
+        height: 630,
+        alt: "Fariduddin Fakhrizan - Full-Stack Developer & Cloud Engineer",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Fariduddin Fakhrizan | Portfolio",
-    description: "Full-Stack Developer, Cloud Engineer, and UI/UX Designer",
+    description: "Full-Stack Developer & Cloud Engineer specializing in high-end UI/UX and scalable architecture. Available for projects.",
+    images: ["/og-image.png"], // Placeholder - add your OG image to public folder
   },
   robots: {
     index: true,

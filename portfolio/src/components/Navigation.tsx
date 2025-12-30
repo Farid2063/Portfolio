@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react'
 const navItems = [
   { href: '/', label: 'Home' },
   { href: '/about', label: 'About' },
-  { href: '/offerings', label: 'Offerings' },
+  { href: '/offerings', label: 'Services' },
   { href: '/technologies', label: 'Technologies' },
   { href: '/projects', label: 'Projects' },
   { href: '/contact', label: 'Contact' },
@@ -74,7 +74,7 @@ export default function Navigation() {
                     className={`relative px-4 py-2 text-xs font-mono uppercase tracking-widest text-white group ${
                       active 
                         ? 'opacity-100' 
-                        : 'opacity-70'
+                        : 'opacity-80'
                     }`}
                     style={{ visibility: 'visible' }}
                   >
@@ -91,6 +91,18 @@ export default function Navigation() {
                   </Link>
                 )
               })}
+              <a
+                href="/MUHAMMAD FARIDUDDIN BIN FAKHRIZAN_SOFTWARE DEVELOPER.pdf"
+                download
+                className="relative px-4 py-2 text-xs font-mono uppercase tracking-widest text-white group opacity-80 hover:opacity-100 transition-all duration-300 resume-button"
+                style={{ visibility: 'visible' }}
+              >
+                <span className="relative z-10 inline-block group-hover:scale-110 transition-all duration-300">
+                  Resume
+                </span>
+                <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                <span className="absolute inset-0 bg-white/10 rounded transform scale-0 group-hover:scale-100 transition-transform duration-300 origin-center" />
+              </a>
             </div>
 
             {/* Mobile Menu Button */}
@@ -131,7 +143,7 @@ export default function Navigation() {
                 href={item.href}
                 onClick={() => setIsOpen(false)}
                 className={`text-3xl font-mono uppercase tracking-widest relative text-white group ${
-                  active ? 'opacity-100' : 'opacity-70'
+                  active ? 'opacity-100' : 'opacity-80'
                 }`}
               >
                 <span className="relative z-10 inline-block group-hover:scale-110 group-hover:opacity-100 transition-all duration-300">
@@ -146,6 +158,17 @@ export default function Navigation() {
               </Link>
             )
           })}
+          <a
+            href="/MUHAMMAD FARIDUDDIN BIN FAKHRIZAN_SOFTWARE DEVELOPER.pdf"
+            download
+            onClick={() => setIsOpen(false)}
+            className="text-3xl font-mono uppercase tracking-widest relative text-white group opacity-80 hover:opacity-100 transition-all duration-300 resume-button"
+          >
+            <span className="relative z-10 inline-block group-hover:scale-110 transition-all duration-300">
+              Resume
+            </span>
+            <span className="absolute -bottom-2 left-0 right-0 h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center" />
+          </a>
         </div>
       </div>
 
