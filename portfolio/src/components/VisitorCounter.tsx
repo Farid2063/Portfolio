@@ -5,12 +5,11 @@ import { useEffect, useState } from "react"
 export default function VisitorCounter() {
   const [count, setCount] = useState<number | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const trackAndFetchVisitor = async () => {
       try {
-        // Always try to track visitor (removed session check to ensure all visits are counted)
+        // Try to track visitor with CountAPI
         const trackResponse = await fetch("/api/visitors", {
           method: "POST",
           headers: {
@@ -21,67 +20,79 @@ export default function VisitorCounter() {
 
         if (trackResponse.ok) {
           const trackData = await trackResponse.json()
-          console.log("Visitor tracking response:", trackData)
           
-          // Use count from response
-          setCount(trackData.count || 0)
+          // Always use the count from response, even if there's an error
+          const apiCount = trackData.count || 0
           
-          // Only show error if tracking failed AND we don't have a valid count
-          // If it's a fallback response but we have a count, don't show error
-          if (trackData.error && !trackData.success && trackData.count === 0) {
-            const errorMsg = trackData.error || "Failed to track visitor"
-            const details = trackData.details ? ` (${trackData.details})` : ""
-            console.warn("Visitor tracking warning:", errorMsg + details)
-            setError(errorMsg)
+          // If we got a valid count from API, use it and save to localStorage
+          if (apiCount > 0 || trackData.success) {
+            setCount(apiCount)
+            localStorage.setItem('visitor_count', apiCount.toString())
+            localStorage.setItem('visitor_count_timestamp', Date.now().toString())
           } else {
-            // Success or fallback with count - no error to show
-            setError(null)
-            if (trackData.fallback && trackData.count > 0) {
-              console.log("Using fallback count:", trackData.count)
+            // API failed, try to get from localStorage
+            const storedCount = localStorage.getItem('visitor_count')
+            const storedTimestamp = localStorage.getItem('visitor_count_timestamp')
+            
+            if (storedCount && storedTimestamp) {
+              const age = Date.now() - parseInt(storedTimestamp)
+              // Use stored count if it's less than 24 hours old
+              if (age < 24 * 60 * 60 * 1000) {
+                setCount(parseInt(storedCount))
+                console.log("Using cached visitor count:", storedCount)
+                return
+              }
             }
+            
+            // No valid count anywhere, just show 0
+            setCount(0)
           }
         } else {
-          const errorData = await trackResponse.json().catch(() => ({}))
-          console.error("Tracking failed with status:", trackResponse.status, errorData)
-          // If tracking fails, just fetch the count
-          await fetchCount()
+          // HTTP error, try localStorage
+          await tryLocalStorageFallback()
         }
       } catch (error) {
-        console.error("Error tracking/fetching visitor:", error)
-        setError("Failed to load visitor count")
-        // Try to just fetch the count as fallback
-        await fetchCount()
+        console.error("Error tracking visitor:", error)
+        // On any error, try localStorage
+        await tryLocalStorageFallback()
       } finally {
         setIsLoading(false)
       }
     }
 
-    const fetchCount = async () => {
+    const tryLocalStorageFallback = async () => {
+      const storedCount = localStorage.getItem('visitor_count')
+      const storedTimestamp = localStorage.getItem('visitor_count_timestamp')
+      
+      if (storedCount && storedTimestamp) {
+        const age = Date.now() - parseInt(storedTimestamp)
+        if (age < 24 * 60 * 60 * 1000) {
+          setCount(parseInt(storedCount))
+          console.log("Using cached visitor count from localStorage:", storedCount)
+          return
+        }
+      }
+      
+      // Try to fetch count without tracking
       try {
         const fetchResponse = await fetch("/api/visitors", {
           cache: "no-store",
         })
         if (fetchResponse.ok) {
           const fetchData = await fetchResponse.json()
-          // Always set count, even if there's an error (fallback mode)
-          setCount(fetchData.count || 0)
-          // Only show error if count is 0 and there's an actual error
-          if (fetchData.error && fetchData.count === 0) {
-            setError("Database unavailable")
-          } else {
-            setError(null)
+          const apiCount = fetchData.count || 0
+          setCount(apiCount)
+          if (apiCount > 0) {
+            localStorage.setItem('visitor_count', apiCount.toString())
+            localStorage.setItem('visitor_count_timestamp', Date.now().toString())
           }
         } else {
-          // Even on error, try to get data
-          const errorData = await fetchResponse.json().catch(() => ({}))
-          console.error("Fetch failed:", errorData)
-          setCount(errorData.count || 0)
-          setError("Unable to load count")
+          // Last resort: use stored count or 0
+          setCount(storedCount ? parseInt(storedCount) : 0)
         }
       } catch (fetchError) {
-        console.error("Error fetching visitor count:", fetchError)
-        setCount(0)
-        setError("Connection error")
+        // Last resort: use stored count or 0
+        setCount(storedCount ? parseInt(storedCount) : 0)
       }
     }
 
@@ -107,18 +118,11 @@ export default function VisitorCounter() {
         VISITOR COUNT
       </span>
       <div className="text-2xl md:text-4xl font-mono font-bold text-white">
-        {error ? (
-          <span className="text-red-400/60 text-sm">Error</span>
-        ) : count !== null ? (
-          count.toLocaleString()
-        ) : (
-          "—"
-        )}
+        {count !== null ? count.toLocaleString() : "0"}
       </div>
       <p className="text-xs font-mono opacity-30 mt-2 tracking-wider">
-        {error ? "Please refresh" : "Total page visits"}
+        Total page visits
       </p>
     </div>
   )
 }
-
