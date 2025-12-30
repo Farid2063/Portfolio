@@ -50,7 +50,7 @@ export default function Navigation() {
   return (
     <>
       {/* Desktop Navigation - Static, Always Visible */}
-      <nav className="fixed top-0 left-0 right-0 z-[100] glass backdrop-blur-md py-4 bg-black/50 border-b border-white/20 shadow-lg">
+      <nav className="fixed top-0 left-0 right-0 z-[100] glass backdrop-blur-md py-4 bg-black/50 border-b border-white/20 shadow-lg opacity-100" style={{ visibility: 'visible', opacity: 1 }}>
         <div className="max-w-7xl mx-auto px-8 md:px-16">
           <div className="flex items-center justify-between">
             {/* Logo/Brand */}
@@ -64,7 +64,7 @@ export default function Navigation() {
             </Link>
 
             {/* Desktop Menu */}
-            <div className="hidden md:flex items-center gap-1">
+            <div className="hidden md:flex items-center gap-1" style={{ visibility: 'visible', opacity: 1 }}>
               {navItems.map((item) => {
                 const active = isActive(item.href)
                 return (
@@ -76,6 +76,7 @@ export default function Navigation() {
                         ? 'opacity-100' 
                         : 'opacity-70'
                     }`}
+                    style={{ visibility: 'visible' }}
                   >
                     <span className="relative z-10 inline-block group-hover:scale-110 group-hover:opacity-100 transition-all duration-300">
                       {item.label}
