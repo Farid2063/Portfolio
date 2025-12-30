@@ -3,7 +3,7 @@ import { NextResponse } from "next/server"
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check if DATABASE_URL is configured
@@ -14,7 +14,8 @@ export async function GET(
       );
     }
 
-    const id = parseInt(params.id)
+    const { id: idParam } = await params
+    const id = parseInt(idParam)
     
     if (isNaN(id)) {
       return NextResponse.json(
@@ -23,7 +24,14 @@ export async function GET(
       )
     }
 
-    const project = await prisma.project.findUnique({
+    if (!prisma) {
+      return NextResponse.json(
+        { error: "Database client not initialized" },
+        { status: 503 }
+      )
+    }
+
+    const project = await prisma!.project.findUnique({
       where: { id },
     })
 

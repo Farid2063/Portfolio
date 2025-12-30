@@ -5,17 +5,13 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 // Prisma Client configuration
-const prismaClientOptions = {
+import type { Prisma } from "@prisma/client";
+
+const prismaClientOptions: Prisma.PrismaClientOptions = {
   log: process.env.NODE_ENV === "development" 
-    ? ["error", "warn"] 
+    ? ["error", "warn"]
     : ["error"],
-  errorFormat: "pretty" as const,
-  // Production optimizations
-  datasources: process.env.DATABASE_URL ? {
-    db: {
-      url: process.env.DATABASE_URL,
-    },
-  } : undefined,
+  errorFormat: "pretty",
 };
 
 // Use singleton pattern in all environments to prevent multiple instances
@@ -37,7 +33,7 @@ if (!globalForPrisma.prisma) {
 const prisma = globalForPrisma.prisma;
 
 // Graceful shutdown
-if (typeof window === "undefined") {
+if (typeof window === "undefined" && prisma) {
   process.on("beforeExit", async () => {
     await prisma.$disconnect();
   });

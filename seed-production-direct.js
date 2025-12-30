@@ -1,0 +1,113 @@
+// Direct production database seeding script
+// This script connects directly to the production database and adds projects
+
+require('dotenv').config({ path: '.env.production.local' });
+const { PrismaClient } = require('@prisma/client');
+
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.PRISMA_DATABASE_URL,
+    },
+  },
+  log: ['error', 'warn'],
+});
+
+async function seedProjects() {
+  try {
+    console.log('🔄 Connecting to production database...');
+    
+    if (!process.env.DATABASE_URL && !process.env.POSTGRES_URL && !process.env.PRISMA_DATABASE_URL) {
+      console.error('❌ No DATABASE_URL found!');
+      console.log('Please make sure .env.production.local exists with DATABASE_URL');
+      process.exit(1);
+    }
+
+    const dbUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.PRISMA_DATABASE_URL;
+    console.log('✅ Using database:', dbUrl.substring(0, 30) + '...');
+
+    // Test connection
+    await prisma.$connect();
+    console.log('✅ Connected to database');
+
+    // Delete existing projects
+    console.log('🔄 Clearing existing projects...');
+    try {
+      await prisma.project.deleteMany({});
+    } catch (deleteError) {
+      // If table doesn't exist, that's okay - we'll create it
+      console.log('⚠️  Could not delete projects (table might not exist yet)');
+    }
+
+    // Add projects using Prisma
+    console.log('🔄 Adding projects...');
+    const projectsData = [
+      {
+        title: "REACH Journal Hub",
+        description: "A globally recognized, open-access knowledge ecosystem. Engineered to host peer-reviewed journals, expert directories, and consultancy activities. Features a high-performance search engine for articles and researchers, a multilingual interface, and a 'Hub of Excellence' for academic collaboration. Tech Highlight: Built with Laravel 12 and Vue.js 3, featuring complex database relations and secure knowledge-sharing protocols.",
+        image: null,
+        link: "https://reach-hub.org/",
+        index: 0,
+        type: "DEVELOPMENT",
+      },
+      {
+        title: "IIIHWS - Integrative Healthcare",
+        description: "A world-class institutional portal for the International Institute of Integrative Healthcare and Wellness Sciences. Designed to bridge modern medical advances with traditional wisdom. Features include accredited program management (Diploma to Doctorate), a translational research ecosystem, and a national certification framework for wellness practitioners. Tech Highlight: Mobile-first responsive design using Tailwind CSS, focusing on accessibility and seamless academic navigation.",
+        image: null,
+        link: "https://integrative-care.org/",
+        index: 1,
+        type: "DEVELOPMENT",
+      },
+      {
+        title: "KLIBS Portal",
+        description: "A comprehensive learning management system currently in high-fidelity prototyping phase. The design encompasses a complete user journey with 15+ screens including hero landing, secure authentication flows, course management, and community features. Built with modern UI/UX principles focusing on intuitive navigation and engaging user experience. Tech Highlight: Figma-based design system ready for Next.js implementation.",
+        image: null,
+        link: "https://www.figma.com/proto/zIYS9dwnUHgrBE04orOxi2/PORTFOLIO?node-id=0-1&t=5kHfSCjBqZsEg51V-1",
+        index: 2,
+        type: "DESIGN",
+      },
+    ];
+
+    // Try with type first, fallback to without type
+    let createdProjects;
+    try {
+      createdProjects = await Promise.all(
+        projectsData.map((data) => prisma.project.create({ data }))
+      );
+    } catch (typeError) {
+      if (typeError.message && typeError.message.includes('type')) {
+        console.log('⚠️  Type column not found, creating without type...');
+        const projectsWithoutType = projectsData.map(({ type, ...rest }) => rest);
+        createdProjects = await Promise.all(
+          projectsWithoutType.map((data) => prisma.project.create({ data }))
+        );
+      } else {
+        throw typeError;
+      }
+    }
+
+    // Verify projects were added
+    const projects = await prisma.project.findMany({
+      orderBy: { index: 'asc' },
+      select: { id: true, title: true, index: true }
+    });
+    
+    console.log('\n✅ Projects added successfully!');
+    console.log(`\nAdded ${projects.length} projects:`);
+    projects.forEach((project, index) => {
+      console.log(`  ${index + 1}. ${project.title} (ID: ${project.id})`);
+    });
+    
+    console.log('\n🎉 Done! Visit: https://portfolio-izn4geion-farid2063s-projects.vercel.app/projects');
+    
+  } catch (error) {
+    console.error('❌ Error seeding database:', error);
+    console.error('Error details:', error.message);
+    process.exit(1);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+seedProjects();
+
